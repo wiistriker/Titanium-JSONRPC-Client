@@ -50,7 +50,7 @@ JSONRPCClient.prototype = {
         
         xhr.open('POST', this._endpoint);
         xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send(requestDataObject);
+        xhr.send(JSON.stringify(requestDataObject));
     },
     
     _requestDataObject: function (method, params, id) {
@@ -103,7 +103,7 @@ JSONRPCClient.prototype = {
             } else {
                 xhr = new ActiveXObject("Microsoft.XMLHTTP");
             }
-        } else if (this.isAppceleratorTitanium()) {
+        } else if (this._isAppceleratorTitanium()) {
             xhr = Titanium.Network.createHTTPClient();
         }
         return xhr;
