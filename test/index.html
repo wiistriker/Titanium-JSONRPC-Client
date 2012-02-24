@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Titanium-JSONRPC-Client Tests</title>
+    <link rel="stylesheet" href="qunit/qunit.css" type="text/css" media="screen">
+    <script type="text/javascript" src="qunit/qunit.js"></script>
+    <script type="text/javascript" src="../jsonrpc.js"></script>
+    <script type="text/javascript">
+        test('primitive', function() {
+            var endpoint = 'http://www.somesite.ru/json-rpc/';
+            var client = new JSONRPCClient(endpoint);
+            
+            equal(client.endpoint, endpoint);
+            equal(client.version, '2.0');
+        });
+        
+        test('requestDataObject', function() {
+            var client = new JSONRPCClient('http://www.somesite.ru/json-rpc/');
+        
+            var obj, expectedObject;
+            
+            obj = client._requestDataObject('ns.method');
+            expectedObject = {
+                method: 'ns.method',
+                jsonrpc: client.version,
+                id: 1
+            }
+            deepEqual(obj, expectedObject);
+            
+            obj = client._requestDataObject('ns.method2', null, 2);
+            expectedObject = {
+                method: 'ns.method2',
+                jsonrpc: client.version,
+                id: 2
+            }
+            deepEqual(obj, expectedObject);
+            
+            obj = client._requestDataObject('ns.method3', [1, 2, 3], 3);
+            expectedObject = {
+                method: 'ns.method3',
+                jsonrpc: client.version,
+                id: 3,
+                params: [1, 2, 3]
+            }
+            deepEqual(obj, expectedObject);
+        });
+        
+        test('call', function() {
+            stop();
+            var client = new JSONRPCClient('jsonrpc_success.txt');
+            client.call('ns.method', {
+                success: function(result, id) {
+                    equal(result, 'Hello JSON-RPC');
+                    start();
+                }
+            });
+            
+            stop();
+            var client = new JSONRPCClient('jsonrpc_error.txt');
+            client.call('ns.method', {
+                error: function(err) {
+                    equal(err.message, 'Test Error');
+                    start();
+                }
+            });
+            
+            stop();
+            var client = new JSONRPCClient('jsonrpc_bad.txt');
+            client.call('ns.method', {
+                error: function(err) {
+                    ok(true);
+                    start();
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div id="qunit"></div>
+</body>
+</html>
