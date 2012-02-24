@@ -7,14 +7,6 @@
     <script type="text/javascript" src="qunit/qunit.js"></script>
     <script type="text/javascript" src="../jsonrpc.js"></script>
     <script type="text/javascript">
-        test('primitive', function() {
-            var endpoint = 'http://www.somesite.ru/json-rpc/';
-            var client = new JSONRPCClient(endpoint);
-            
-            equal(client.endpoint, endpoint);
-            equal(client.version, '2.0');
-        });
-        
         test('requestDataObject', function() {
             var client = new JSONRPCClient('http://www.somesite.ru/json-rpc/');
         
@@ -23,7 +15,7 @@
             obj = client._requestDataObject('ns.method');
             expectedObject = {
                 method: 'ns.method',
-                jsonrpc: client.version,
+                jsonrpc: '2.0',
                 id: 1
             }
             deepEqual(obj, expectedObject);
@@ -31,7 +23,7 @@
             obj = client._requestDataObject('ns.method2', null, 2);
             expectedObject = {
                 method: 'ns.method2',
-                jsonrpc: client.version,
+                jsonrpc: '2.0',
                 id: 2
             }
             deepEqual(obj, expectedObject);
@@ -39,7 +31,7 @@
             obj = client._requestDataObject('ns.method3', [1, 2, 3], 3);
             expectedObject = {
                 method: 'ns.method3',
-                jsonrpc: client.version,
+                jsonrpc: '2.0',
                 id: 3,
                 params: [1, 2, 3]
             }
