@@ -3,10 +3,13 @@ Simple JSON-RPC client for Titanium (appcelerator.com)
 Can work in browser too
 
 Usage:
-var client = new JSONRPCClient('jsonrpc_success.txt');
+var client = new JSONRPCClient('http://webservice.com/json-rpc/');
 client.call('ns.method', {
-    success: function(result, id) {
-        equal(result, 'Hello JSON-RPC');
-        start();
+    params: [1, true],
+    success: function(result) {
+        //result handling
+    },
+    error: function(err) {
+        //error handling
     }
 });
