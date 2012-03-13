@@ -52,6 +52,7 @@
             var client = new JSONRPCClient('jsonrpc_error.txt');
             client.call('ns.method', {
                 error: function(err) {
+                    console.log(err);
                     equal(err.message, 'Test Error');
                     start();
                 }

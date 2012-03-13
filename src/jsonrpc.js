@@ -19,38 +19,51 @@ JSONRPCClient.prototype = {
         var requestDataObject = this._requestDataObject(method, callParams, id);
         
         var xhr = this._getXHR();
-        xhr.onload = function () {
-            var responseObject;
+        if (xhr) {
+            xhr.open('POST', this._endpoint);
+            xhr.setRequestHeader('Content-Type', 'application/json');
             
-            try {
-                responseObject = JSON.parse(this.responseText);
-            } catch (err) {
-                if (typeof options.error === 'function') {
-                    options.error(err);
+            var self = this;
+            
+            xhr.onload = function () {
+                var responseObject;
+                
+                try {
+                    responseObject = JSON.parse(this.responseText);
+                } catch (err) {
+                    self._errorCallback(options, {code: 0, message: 'undefined response'});
                     return;
                 }
-            }
-            
-            if (typeof responseObject.result === 'undefined' ||
-                typeof responseObject.error !== 'undefined' ||
-                typeof responseObject.id !== 'undefined') {
-                //@todo: send error
-            }
-            
-            if (responseObject.result) {
-                if (typeof options.success === 'function') {
-                    options.success(responseObject.result);
+                
+                if (typeof responseObject.result === 'undefined' ||
+                    typeof responseObject.error === 'undefined' ||
+                    typeof responseObject.id === 'undefined') {
+                        self._errorCallback(options, {code: 0, message: 'undefined response'});
+                        return;
                 }
-            } else if (responseObject.error) {
-                if (typeof options.error === 'function') {
-                    options.error(responseObject.error);
+                
+                if (responseObject.result) {
+                    self._successCallback(options, responseObject.result);
+                } else if (responseObject.error) {
+                    self._errorCallback(options, responseObject.error);
                 }
-            }
-        };
-        
-        xhr.open('POST', this._endpoint);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send(JSON.stringify(requestDataObject));
+            };
+            xhr.send(JSON.stringify(requestDataObject));
+        } else {
+            this._errorCallback(options, {code: 0, message: 'transport error'});
+        }
+    },
+    
+    _successCallback: function(options, result) {
+        if (typeof options.success === 'function') {
+            options.success(result);
+        }
+    },
+    
+    _errorCallback: function(options, result) {
+        if (typeof options.error === 'function') {
+            options.error(result);
+        }
     },
     
     _requestDataObject: function (method, params, id) {
@@ -83,7 +96,7 @@ JSONRPCClient.prototype = {
         }
     },
 
-    _isAppceleratorTitanium: function() {
+    _isAppceleratorEnvironment: function() {
         try {
             if (Titanium) {
                 return true;
@@ -101,9 +114,9 @@ JSONRPCClient.prototype = {
             if (window.XMLHttpRequest) {
                 xhr = new XMLHttpRequest();
             } else {
-                xhr = new ActiveXObject("Microsoft.XMLHTTP");
+                xhr = new ActiveXObject('Microsoft.XMLHTTP');
             }
-        } else if (this._isAppceleratorTitanium()) {
+        } else if (this._isAppceleratorEnvironment()) {
             xhr = Titanium.Network.createHTTPClient();
         }
         return xhr;
